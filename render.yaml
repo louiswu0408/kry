@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: kry
+    runtime: docker
+    plan: free
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEMO_MODE
+        value: "1"
