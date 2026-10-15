@@ -3,7 +3,6 @@
 !.env.example
 .venv/
 __pycache__/
-*.pyc
 .cache/
 frontend/node_modules/
 frontend/dist/
