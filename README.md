@@ -52,6 +52,17 @@ kry/
 
 ## Getting Started
 
+### Quick Start (Windows)
+
+After installing the dependencies and configuring `.env`,
+double-click `start-kry.bat` to automatically:
+
+- Start the FastAPI backend on port 8000.
+- Start the React frontend on port 5173.
+- Open Kry in your default browser.
+
+Keep both terminal windows running while using Kry locally.
+
 ### 1. Prerequisites
 
 Install the following:
