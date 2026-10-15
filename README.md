@@ -1,73 +1,179 @@
-# Rift Roast — Python starter
+# Kry — AI-Powered League of Legends Analytics & Roast Generator
 
-A **consent-based** League of Legends statistics and playful-roast CLI. Start with your **own** Riot ID or a friend who wants to participate. Does not send chat messages, gather personal data, or target strangers.
+**Kry** is a full-stack web application that analyzes League of Legends match history and generates personalized, AI-powered gameplay roasts.
 
-## 1. Create your Riot API key
+Built with **React, FastAPI, Python, Riot Games API, and Google Gemini**, Kry transforms gameplay statistics into detailed performance summaries and sarcastic, statistics-based verdicts.
 
-Sign in at https://developer.riotgames.com/. Copy your Development API Key; Riot development keys expire after 24 hours.
+The application is designed for voluntary participation and focuses on gameplay performance rather than personal information or harassment.
 
-## 2. Install (Windows PowerShell)
+## Features
 
-In a PowerShell terminal from this folder:
+- **Riot Games Integration:** Retrieve match history using a player's Riot ID.
+- **Performance Analytics:** Calculate win rate, KDA, average kills, deaths, and assists.
+- **Champion Statistics:** Analyze performance across individual champions.
+- **AI-Powered Verdicts:** Generate personalized gameplay roasts using Google Gemini.
+- **Nuclear Roast Mode:** Deliver aggressive, sarcastic gaming humor based on actual match statistics.
+- **Fallback Generator:** Use predefined verdicts when the AI service is unavailable.
+- **Interactive Dashboard:** View statistics and verdicts through a React web interface.
+- **Match Count Selection:** Analyze different numbers of recent matches, subject to Riot API limits.
+
+## Tech Stack
+
+| Component | Technologies |
+|---|---|
+| Frontend | React, JavaScript, CSS, Vite |
+| Backend | Python, FastAPI, Uvicorn |
+| Game Data | Riot Games API (Account-V1, Match-V5) |
+| AI Integration | Google Gemini API |
+| HTTP Client | Python Requests |
+| Development | Git, GitHub, VS Code |
+
+## Project Structure
+
+```text
+kry/
+├── api.py                 # FastAPI backend
+├── main.py                # Riot API and statistics logic
+├── ai_verdict.py          # Gemini verdict generation
+├── requirements.txt       # Python dependencies
+├── .env.example           # Environment variable template
+├── .gitignore
+├── tests/                 # Python unit tests
+└── frontend/
+    ├── src/
+    │   ├── App.jsx        # Main React interface
+    │   ├── App.css
+    │   ├── index.css
+    │   └── main.jsx
+    ├── package.json
+    ├── vite.config.js
+    └── index.html
+```
+
+## Getting Started
+
+### 1. Prerequisites
+
+Install the following:
+
+- Python 3.10 or later
+- Node.js and npm
+- Git
+- A Riot Games Development API key
+- A Google Gemini API key (optional for AI verdicts)
+
+### 2. Clone the Repository
+
+```powershell
+git clone https://github.com/louiswu0408/kry.git
+cd kry
+```
+
+### 3. Configure the Backend
+
+Create a Python virtual environment:
 
 ```powershell
 py -m venv .venv
+```
+
+Install dependencies:
+
+```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Create the environment configuration:
+
+```powershell
 Copy-Item .env.example .env
-notepad .env
 ```
 
-Replace `RGAPI_REPLACE_ME` in `.env` with your actual key. **Do not share your key or upload `.env` to GitHub.**
+Edit `.env`:
 
-## 3. Try demo mode without a key
+```env
+RIOT_API_KEY=your_riot_api_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+**Never commit `.env` or expose your API keys publicly.**
+
+Riot development API keys expire after 24 hours and must be refreshed periodically.
+
+### 4. Start the FastAPI Backend
+
+From the project root:
 
 ```powershell
-.\.venv\Scripts\python.exe main.py --demo
+.\.venv\Scripts\python.exe -m uvicorn api:app --reload
 ```
 
-## 4. Try your own account
+The backend runs at:
+
+http://127.0.0.1:8000
+
+Interactive API documentation is available at:
+
+http://127.0.0.1:8000/docs
+
+### 5. Start the React Frontend
+
+Open a second terminal:
 
 ```powershell
-.\.venv\Scripts\python.exe main.py "Your Riot Name#NA1" --region americas --count 10
+cd frontend
+npm install
+npm run dev
 ```
 
-Put the Riot ID in quotes if it contains spaces. The hashtag is part of your actual Riot ID (it may *not* be `NA1`). The `--region` flag is an API routing cluster, **not** your Riot ID's tagline. Use `americas` for NA/BR/LAN/LAS, `europe` for EUW/EUNE/TR/RU, and `asia` for KR/JP. This first starter does not support SEA routing yet.
+Open the website at:
 
-For quick iteration, use `--count 5`. Each match detail costs a request. No request is made in demo mode.
+http://localhost:5173
 
-## 5. Run tests
+Keep both the frontend and backend servers running during local development.
 
-```powershell
-.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+## How It Works
+
+1. **Player Lookup:** The user enters a Riot ID and selects a routing region.
+2. **Account Identification:** Riot Account-V1 resolves the Riot ID to a unique PUUID.
+3. **Match Retrieval:** Match-V5 retrieves recent match IDs and detailed match information.
+4. **Statistical Analysis:** Python calculates overall and champion-specific performance metrics.
+5. **AI Verdict Generation:** Aggregated statistics are sent to Google Gemini to generate an original gameplay roast.
+6. **Frontend Display:** React presents player statistics, champion performance, and the generated verdict.
+
+If AI generation fails, Kry can fall back to its rule-based roast generator.
+
+## Performance Metrics
+
+Kry calculates the following metrics:
+
+| Metric | Calculation |
+|---|---|
+| Win Rate | Wins / Matches × 100 |
+| Average Kills | Total Kills / Matches |
+| Average Deaths | Total Deaths / Matches |
+| Average Assists | Total Assists / Matches |
+| Overall KDA | (Total Kills + Total Assists) / Total Deaths |
+| Champion Win Rate | Champion Wins / Champion Matches × 100 |
+
+When total deaths equal zero, KDA is handled separately to avoid division by zero.
+
+Small sample sizes may not accurately represent a player's long-term performance.
+
+## API Endpoints
+
+### GET /health
+
+Checks whether the backend is running.
+
+Example response:
+
+```json
+{
+  "status": "ok"
+}
 ```
 
-## How it works
+### GET /report
 
-1. Account-V1: `/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}` returns a **PUUID**.
-2. Match-V5: `/lol/match/v5/matches/by-puuid/{puuid}/ids` returns match IDs.
-3. Match-V5: `/lol/match/v5/matches/{matchId}` returns match data.
-4. Find the participant with the exact PUUID and compute summary statistics.
-5. Produce playful, statistics-only humor. No language-model/API key needed.
-
-Win rate is wins / games. Overall KDA is (total kills + total assists) / total deaths; if no deaths occurred, we display *Perfect (0 deaths)*. The starter includes all recent game modes returned by the endpoint, so ranked-only averages require an additional queue filter in a later iteration.
-
-## Common errors
-
-- **401/403**: missing, invalid or expired API key. Refresh your development key.
-- **404**: check `Name#Tagline`, whether the account exists, and the routing region.
-- **429**: rate limit; retry later with a smaller `--count`.
-- **No matches**: the account has no recent supported match records in that cluster.
-
-## Next improvements
-
-- Filtering queues (e.g., Ranked Solo/Duo vs ARAM)
-- Cache retrieved games to avoid repeated API calls
-- Tests with recorded, scrubbed API payloads
-- FastAPI backend and React frontend
-- Opt-in profiles and shareable dashboard, subject to Riot approval/policies for a public app
-
-## Important
-
-Development API access is for prototyping. A public product needs the appropriate Riot Developer Portal registration/approval. Don't use this project to harass other players or reveal hidden/personal information. Riot requires a notice that the app is not endorsed by Riot Games if publicly released.
-
-Official documentation: https://developer.riotgames.com/docs/lol and https://developer.riotgames.com/docs/portal
+Retrieves player
